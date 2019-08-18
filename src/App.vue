@@ -17,12 +17,14 @@
     <weather-info
       v-else-if="results"
       v-bind="weatherData"
+      :isAGoodDay="isAGoodDay"
     />
     <h2 v-else> No results for '{{weatherData.cityName}}', try with other city.</h2>
   </div>
 </template>
 
 <script>
+import { mapState } from 'vuex';
 import Preferences from '@/components/Preferences.vue';
 import WeatherInfo from '@/components/WeatherInfo.vue';
 import storage from '@/utils/storage';
@@ -39,14 +41,32 @@ export default {
       searchInput: '',
       results: false,
       loading: true,
+      temperature: '',
       weatherData: {
         cityName: '',
         icon: null,
-        temperature: '',
-        humidity: '',
-        wind: '',
-        maxTemperature: '',
-        minTemperature: '',
+        extraInfo: {
+          minTemperature: {
+            value: '',
+            name: 'Min Temperature',
+            units: 'ºC',
+          },
+          maxTemperature: {
+            value: '',
+            name: 'Max Temperature',
+            units: 'ºC',
+          },
+          wind: {
+            value: '',
+            name: 'Wind',
+            units: 'km/h',
+          },
+          humidity: {
+            value: '',
+            name: 'Humidity',
+            units: '%',
+          },
+        },
       },
     };
   },
@@ -69,15 +89,16 @@ export default {
 
           if (cod === 200) {
             const weatherResponseData = weather[0];
+            const { extraInfo } = this.weatherData;
             this.results = true;
-            this.weatherData.temperature = Math.round(main.temp);
-            this.weatherData.maxTemperature = Math.round(main.temp_max);
-            this.weatherData.minTemperature = Math.round(main.temp_min);
-            this.weatherData.icon = api.getIcon(weatherResponseData.icon);
-            this.weatherData.humidity = main.humidity;
-            this.weatherData.wind = wind.speed;
-            this.weatherData.cityName = name;
             this.searchInput = '';
+            this.weatherData.cityName = name;
+            this.weatherData.icon = api.getIcon(weatherResponseData.icon);
+            this.weatherData.temperature = Math.round(main.temp);
+            extraInfo.minTemperature.value = Math.round(main.temp_min);
+            extraInfo.maxTemperature.value = Math.round(main.temp_max);
+            extraInfo.wind.value = wind.speed;
+            extraInfo.humidity.value = main.humidity;
           } else {
             this.weatherData.cityName = city;
             this.results = false;
@@ -89,6 +110,25 @@ export default {
         .finally(() => {
           this.loading = false;
         });
+    },
+  },
+  computed: {
+    ...mapState(['userPreferences']),
+    /**
+     * Method to check if its a good day or not based
+     * on the user preferences stored in vuex.
+     */
+    isAGoodDay() {
+      const { extraInfo } = this.weatherData;
+      const { value: minTempValue } = this.userPreferences.minTemp;
+      const { value: maxTempValue } = this.userPreferences.maxTemp;
+      const { value: maxWindValue } = this.userPreferences.maxWind;
+      const { value: maxHumidityValue } = this.userPreferences.maxHumidity;
+
+      return minTempValue <= this.weatherData.temperature
+            && this.weatherData.temperature <= maxTempValue
+            && extraInfo.wind.value <= maxWindValue
+            && extraInfo.humidity.value <= maxHumidityValue;
     },
   },
   /**

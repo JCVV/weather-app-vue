@@ -1,39 +1,26 @@
 <template>
   <section class="weather-info">
-      <h1>{{cityName}}</h1>
-    <h1 class="weather-result" v-if="isAGoodDay">
+    <h1>{{cityName}}</h1>
+    <h1 v-if="isAGoodDay" class="weather-result">
       What a lovely day! Time to go out!
     </h1>
-    <h1 class="weather-result" v-else>
-      What a bad day. Stay at home.
+    <h1 v-else class="weather-result">
+      What a bad day! Stay at home.
     </h1>
     <div class="temperature-info">
       <div class="temperature-info-value">{{temperature}}ºC</div>
-      <img class="temperature-info-icon" v-if="icon !== null" v-bind:src="icon"/>
+      <img v-if="icon !== null" class="temperature-info-icon" v-bind:src="icon"/>
     </div>
     <div class="extra-info">
-        <div class="extra-info-block">
-          <div>Humidity:</div>
-          <div>{{humidity}}%</div>
-        </div>
-        <div class="extra-info-block">
-          <div>Wind:</div>
-          <div>{{wind}}km/h</div>
-        </div>
-        <div class="extra-info-block">
-          <div>Max Temp:</div>
-          <div>{{maxTemperature}}ºC</div>
-        </div>
-        <div class="extra-info-block">
-          <div>Min Temp:</div>
-          <div>{{minTemperature}}ºC</div>
+        <div class="extra-info-block" v-for="(info, index) in extraInfo" :key="index">
+          <div>{{info.name}}</div>
+          <p>{{info.value}}{{info.units}}</p>
         </div>
       </div>
   </section>
 </template>
 
 <script>
-import { mapState } from 'vuex';
 /**
  * Component to show the weather info.
  * It receives the weather info through the props
@@ -44,29 +31,9 @@ export default {
   props: {
     cityName: String,
     temperature: Number,
-    maxTemperature: Number,
-    minTemperature: Number,
-    humidity: Number,
-    wind: Number,
     icon: String,
-  },
-  computed: {
-    ...mapState(['userPreferences']),
-    /**
-     * Method to check if its a good day or not based
-     * on the user preferences stored in vuex.
-     */
-    isAGoodDay() {
-      const { value: minTempValue } = this.userPreferences.minTemp;
-      const { value: maxTempValue } = this.userPreferences.maxTemp;
-      const { value: maxWindValue } = this.userPreferences.maxWind;
-      const { value: maxHumidityValue } = this.userPreferences.maxHumidity;
-
-      return minTempValue <= this.temperature
-            && this.temperature <= maxTempValue
-            && this.wind <= maxWindValue
-            && this.humidity <= maxHumidityValue;
-    },
+    extraInfo: [Object],
+    isAGoodDay: Boolean,
   },
 };
 </script>
