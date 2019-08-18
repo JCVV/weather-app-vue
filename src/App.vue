@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <preferences />
+    <user-settings />
     <form @submit.prevent="formSubmitted()">
       <input
         v-model="searchInput"
@@ -25,7 +25,7 @@
 
 <script>
 import { mapState } from 'vuex';
-import Preferences from '@/components/Preferences.vue';
+import UserSettings from '@/components/UserSettings.vue';
 import WeatherInfo from '@/components/WeatherInfo.vue';
 import storage from '@/utils/storage';
 import api from '@/services/api';
@@ -33,7 +33,7 @@ import api from '@/services/api';
 export default {
   name: 'App',
   components: {
-    Preferences,
+    UserSettings,
     WeatherInfo,
   },
   data() {
@@ -163,20 +163,21 @@ export default {
 </script>
 
 <style lang="scss">
-body {
+@import url('https://fonts.googleapis.com/css?family=Montserrat');
+@import url('https://fonts.googleapis.com/css?family=Helvetica');
+
+#app {
+  width: 480px;
+  height: 410px;
   background: #52bacc;
   background: -webkit-linear-gradient(to bottom, #52bacc, #047AA5);
   background: linear-gradient(to bottom, #52bacc, #047AA5);
   background-repeat: no-repeat;
-}
-#app {
-  font-family: "Avenir", Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
+  font-family: "Montserrat", sans-serif;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   position: relative;
   color: #eeefff;
-  height: 420px;
   overflow: hidden;
   padding: 30px 150px;
   .city-input {
